@@ -1,5 +1,3 @@
-const BASE_URL = "http://localhost:8080";
-
 /* =======================
    🔐 AUTH HEADER
    ======================= */
@@ -23,9 +21,13 @@ function authHeader() {
 // ✅ TOTAL USERS
 export async function getUserCount() {
     const response = await fetch(
-        `${BASE_URL}/api/admin/jarvis-users/count`,
+        "/api/admin/jarvis-users/count",
         { headers: authHeader() }
     );
+
+    if (response.status === 401 || response.status === 403) {
+        throw new Error("UNAUTHORIZED");
+    }
 
     if (!response.ok) {
         throw new Error("Failed to fetch user count");
@@ -34,12 +36,16 @@ export async function getUserCount() {
     return response.json();
 }
 
-// 🆕 USERS ADDED TODAY (FOR GRAPH)
+// 🆕 USERS ADDED TODAY
 export async function getTodayUserCount() {
     const response = await fetch(
-        `${BASE_URL}/api/admin/jarvis-users/today-count`,
+        "/api/admin/jarvis-users/today-count",
         { headers: authHeader() }
     );
+
+    if (response.status === 401 || response.status === 403) {
+        throw new Error("UNAUTHORIZED");
+    }
 
     if (!response.ok) {
         throw new Error("Failed to fetch today user count");
@@ -51,9 +57,13 @@ export async function getTodayUserCount() {
 // ✅ ALL USERS
 export async function getAllUsers() {
     const response = await fetch(
-        `${BASE_URL}/api/admin/jarvis-users`,
+        "/api/admin/jarvis-users",
         { headers: authHeader() }
     );
+
+    if (response.status === 401 || response.status === 403) {
+        throw new Error("UNAUTHORIZED");
+    }
 
     if (!response.ok) {
         throw new Error("Failed to fetch users");

@@ -1,13 +1,57 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllUsers } from "../api/adminApi";
 import "../styles/adminUsers.css";
 
+/* 🕒 Date + Time Formatter */
+function formatDateTime(dateString) {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    });
+}
+
+/* ⏱ Last Seen Text */
+function getLastSeenText(lastLoginAt) {
+    if (!lastLoginAt) return "never";
+
+    const diffMs = Date.now() - new Date(lastLoginAt).getTime();
+    const minutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 2) return "just now";
+    if (minutes < 60) return `${minutes} mins ago`;
+    if (hours < 24) return `${hours} hrs ago`;
+    return `${days} days ago`;
+}
+
+/* 🟢 REAL ONLINE CHECK (5-MIN WINDOW) */
+function isUserReallyOnline(user) {
+    if (!user.online || !user.lastLoginAt) return false;
+
+    const diffMs = Date.now() - new Date(user.lastLoginAt).getTime();
+    return diffMs / 60000 <= 5;
+}
+
 export default function AdminUsers() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [search, setSearch] = useState("");
+    const [roleFilter, setRoleFilter] = useState("ALL");
+    const [secureFilter, setSecureFilter] = useState("ALL");
+    const [sortBy, setSortBy] = useState("NAME");
+
     const navigate = useNavigate();
 
+    /* 🔹 INITIAL LOAD */
     useEffect(() => {
         getAllUsers()
             .then((data) => {
@@ -15,20 +59,59 @@ export default function AdminUsers() {
                 setLoading(false);
             })
             .catch((err) => {
-                console.error("Failed to fetch users", err);
-
-                // 🔐 JWT missing / expired / invalid
-                if (
-                    err.message === "UNAUTHORIZED" ||
-                    err.message === "No JWT token found"
-                ) {
-                    localStorage.removeItem("token");
-                    navigate("/login");
-                }
-
-                setLoading(false);
+                console.error(err);
+                localStorage.removeItem("token");
+                navigate("/login");
             });
     }, [navigate]);
+
+    /* 🔄 AUTO REFRESH (30s) */
+    useEffect(() => {
+        const interval = setInterval(() => {
+            getAllUsers()
+                .then(setUsers)
+                .catch(() => {});
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    /* 🧠 FILTER + SORT */
+    const filteredUsers = useMemo(() => {
+        let filtered = [...users];
+
+        if (search.trim()) {
+            filtered = filtered.filter(
+                (u) =>
+                    u.name.toLowerCase().includes(search.toLowerCase()) ||
+                    u.email.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        if (roleFilter !== "ALL") {
+            filtered = filtered.filter((u) => u.role === roleFilter);
+        }
+
+        if (secureFilter !== "ALL") {
+            filtered = filtered.filter(
+                (u) => u.secureMode === (secureFilter === "ON")
+            );
+        }
+
+        if (sortBy === "NAME") {
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        if (sortBy === "TIME") {
+            filtered.sort(
+                (a, b) =>
+                    new Date(b.createdAt || 0) -
+                    new Date(a.createdAt || 0)
+            );
+        }
+
+        return filtered;
+    }, [users, search, roleFilter, secureFilter, sortBy]);
 
     if (loading) {
         return <h2 style={{ textAlign: "center" }}>Loading users...</h2>;
@@ -36,16 +119,37 @@ export default function AdminUsers() {
 
     return (
         <div className="admin-users-container">
-            {/* 🔙 HEADER BAR */}
             <div className="admin-users-header">
                 <h2>Jarvis Users</h2>
-
-                <button
-                    className="back-btn"
-                    onClick={() => navigate("/dashboard")}
-                >
+                <button className="back-btn" onClick={() => navigate("/dashboard")}>
                     ← Back to Dashboard
                 </button>
+            </div>
+
+            <div className="users-filter-bar">
+                <input
+                    type="text"
+                    placeholder="Search name or email..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+
+                <select onChange={(e) => setRoleFilter(e.target.value)}>
+                    <option value="ALL">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="guest">Guest</option>
+                </select>
+
+                <select onChange={(e) => setSecureFilter(e.target.value)}>
+                    <option value="ALL">All Secure Modes</option>
+                    <option value="ON">Secure ON</option>
+                    <option value="OFF">Secure OFF</option>
+                </select>
+
+                <select onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="NAME">Sort by Name</option>
+                    <option value="TIME">Sort by Joined Time</option>
+                </select>
             </div>
 
             <table className="users-table">
@@ -54,30 +158,42 @@ export default function AdminUsers() {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
+                    <th>Joined On</th>
+                    <th>Status</th>
                     <th>Secure Mode</th>
                 </tr>
                 </thead>
                 <tbody>
-                {users.map((user) => (
-                    <tr key={user.id}>
-                        <td>{user.name}</td>
-                        <td>{user.email}</td>
-                        <td>
-                                <span className="role-badge">
-                                    {user.role}
-                                </span>
-                        </td>
-                        <td
-                            className={
-                                user.secureMode
-                                    ? "secure-on"
-                                    : "secure-off"
-                            }
-                        >
-                            {user.secureMode ? "ON" : "OFF"}
+                {filteredUsers.length === 0 ? (
+                    <tr>
+                        <td colSpan="6" style={{ textAlign: "center" }}>
+                            No users found
                         </td>
                     </tr>
-                ))}
+                ) : (
+                    filteredUsers.map((user) => (
+                        <tr key={user.id}>
+                            <td>{user.name}</td>
+                            <td>{user.email}</td>
+                            <td>
+                                <span className="role-badge">{user.role}</span>
+                            </td>
+                            <td>{formatDateTime(user.createdAt)}</td>
+                            <td>
+                                {isUserReallyOnline(user) ? (
+                                    <span className="status-online">🟢 Online</span>
+                                ) : (
+                                    <span className="status-offline">
+                                            🔴 Offline (last seen {getLastSeenText(user.lastLoginAt)})
+                                        </span>
+                                )}
+                            </td>
+                            <td className={user.secureMode ? "secure-on" : "secure-off"}>
+                                {user.secureMode ? "ON" : "OFF"}
+                            </td>
+                        </tr>
+                    ))
+                )}
                 </tbody>
             </table>
         </div>

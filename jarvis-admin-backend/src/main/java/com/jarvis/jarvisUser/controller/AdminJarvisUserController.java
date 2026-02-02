@@ -101,8 +101,13 @@ public class AdminJarvisUserController {
                         user.getEmail(),
                         user.getRole(),
                         user.isSecureMode(),
-                        user.getAvatar()
+                        user.getAvatar(),
+                        user.getCreatedAt(),
+                        user.getLastLoginAt(),
+                        user.isOnline()          // ✅ THIS WAS MISSING
                 ))
-                .collect(Collectors.toList());
+
+
+                        .collect(Collectors.toList());
     }
 }
