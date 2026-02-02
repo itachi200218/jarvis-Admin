@@ -1,0 +1,190 @@
+/* ==============================
+   🌐 ADMIN USERS CONTAINER
+   ============================== */
+.admin-users-container {
+    padding: 30px;
+    max-width: 1200px;
+    margin: auto;
+    animation: fadeIn 0.4s ease-in-out;
+
+    /* 🖤 DARK BACKGROUND */
+    background: #020617;
+    min-height: 100vh;
+    color: #e5e7eb;
+}
+
+.admin-users-container h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+/* ==============================
+   🧭 HEADER BAR
+   ============================== */
+.admin-users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* 🔙 BACK BUTTON */
+.back-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #e5e7eb;
+    transition: all 0.25s ease;
+}
+
+.back-btn:hover {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+/* ==============================
+   📊 USERS TABLE
+   ============================== */
+.users-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: rgba(15, 23, 42, 0.85); /* glass dark */
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+/* HEADER */
+.users-table th {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: #f8fafc;
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* CELLS */
+.users-table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #e5e7eb;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ROW HOVER */
+.users-table tbody tr {
+    transition: background 0.25s ease, transform 0.1s ease;
+}
+
+.users-table tbody tr:hover {
+    background-color: rgba(99, 102, 241, 0.08);
+    transform: scale(1.004);
+}
+
+/* LAST ROW BORDER FIX */
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ==============================
+   🟢 ROLE / STATUS BADGES
+   ============================== */
+.role-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+}
+
+.secure-on {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.secure-off {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* ==============================
+   🖼 AVATAR
+   ============================== */
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+/* ==============================
+   📱 RESPONSIVE
+   ============================== */
+@media (max-width: 768px) {
+    .users-table thead {
+        display: none;
+    }
+
+    .users-table,
+    .users-table tbody,
+    .users-table tr,
+    .users-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .users-table tr {
+        margin-bottom: 15px;
+        background: rgba(15, 23, 42, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        padding: 10px;
+    }
+
+    .users-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .users-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #94a3b8;
+    }
+
+    .users-table td:last-child {
+        border-bottom: none;
+    }
+}
+
+/* ==============================
+   ✨ ANIMATION
+   ============================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
