@@ -4,6 +4,7 @@ import AddUser from "./pages/AddUser";
 import Dashboard from "./pages/Dashboard";
 import AdminUsers from "./pages/AdminUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminSecureCommands from "./pages/AdminSecureCommands";
 
 function App() {
     return (
@@ -31,6 +32,16 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path="/admin/secure-commands/:userId"
+                    element={
+                        <ProtectedRoute>
+                            <AdminSecureCommands />
+                        </ProtectedRoute>
+                    }
+                />
+
+
             </Routes>
         </BrowserRouter>
     );

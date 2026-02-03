@@ -1,0 +1,81 @@
+/* 🔔 DELETE CONFIRM MODAL */
+.delete-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.delete-confirm-box {
+    background: #141b24;
+    padding: 20px 22px;
+    border-radius: 14px;
+    width: 340px;
+    color: #eaeaea;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+    animation: popIn 0.2s ease;
+}
+
+.delete-confirm-box h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: #ff6b6b;
+}
+
+.delete-confirm-box p {
+    font-size: 14px;
+    margin: 6px 0;
+}
+
+.warn-text {
+    color: #ff9f9f;
+    font-size: 13px;
+}
+
+.delete-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.cancel-btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid #555;
+    color: #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.cancel-btn:hover {
+    background: #222;
+}
+
+.confirm-btn {
+    padding: 6px 14px;
+    background: #ff4d4d;
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.confirm-btn:hover {
+    background: #ff2f2f;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

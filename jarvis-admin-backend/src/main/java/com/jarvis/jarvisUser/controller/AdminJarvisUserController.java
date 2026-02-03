@@ -4,6 +4,7 @@ import com.jarvis.jarvisAdmin.dto.AdminUserDTO;
 import com.jarvis.jarvisUser.model.User;
 import com.jarvis.jarvisUser.service.AdminUserService;
 import com.jarvis.repository.JarvisUserRepository;
+import com.jarvis.repository.UserCommandRuleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,8 @@ public class AdminJarvisUserController {
 
     @Autowired
     private JarvisUserRepository jarvisUserRepo;
+    @Autowired
+    private UserCommandRuleRepository userCommandRuleRepo;
 
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
     private static final ZoneId UTC = ZoneId.of("UTC");
@@ -129,6 +132,24 @@ public class AdminJarvisUserController {
         }
 
         adminUserService.updateUserRole(id, role.toLowerCase());
+    }
+    /* ==========================
+       ❌ DELETE USER (ADMIN)
+       ========================== */
+    @DeleteMapping("/{id}")
+    public Map<String, String> deleteJarvisUser(@PathVariable String id) {
+
+        // ❌ delete user command rules first
+        userCommandRuleRepo.deleteByUserId(id);
+
+        // ❌ delete user
+        jarvisUserRepo.deleteById(id);
+
+        return Map.of(
+                "status", "success",
+                "message", "User and command rules deleted",
+                "userId", id
+        );
     }
 
 }

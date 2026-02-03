@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllUsers, updateUserRole } from "../api/adminApi";
+import { getAllUsers, updateUserRole, deleteUser } from "../api/adminApi";
+import DeleteConfirm from "../components/DeleteConfirm";
 import "../styles/adminUsers.css";
 
-/* 🕒 Date + Time Formatter */
 function formatDateTime(dateString) {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -17,10 +17,8 @@ function formatDateTime(dateString) {
     });
 }
 
-/* ⏱ Last Seen Text */
 function getLastSeenText(lastSeenAt) {
     if (!lastSeenAt) return "never";
-
     const diffMs = Date.now() - new Date(lastSeenAt).getTime();
     const minutes = Math.floor(diffMs / 60000);
     const hours = Math.floor(minutes / 60);
@@ -32,7 +30,6 @@ function getLastSeenText(lastSeenAt) {
     return `${days} days ago`;
 }
 
-/* 🟢 REAL ONLINE CHECK */
 function isUserReallyOnline(user) {
     if (!user.online || !user.lastSeenAt) return false;
     const diffMs = Date.now() - new Date(user.lastSeenAt).getTime();
@@ -42,15 +39,13 @@ function isUserReallyOnline(user) {
 export default function AdminUsers() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("ALL");
     const [secureFilter, setSecureFilter] = useState("ALL");
     const [sortBy, setSortBy] = useState("NAME");
-
+    const [userToDelete, setUserToDelete] = useState(null);  // Add this state
     const navigate = useNavigate();
 
-    /* 🔹 INITIAL LOAD */
     useEffect(() => {
         getAllUsers()
             .then((data) => {
@@ -63,7 +58,6 @@ export default function AdminUsers() {
             });
     }, [navigate]);
 
-    /* 🔄 AUTO REFRESH */
     useEffect(() => {
         const interval = setInterval(() => {
             getAllUsers().then(setUsers).catch(() => {});
@@ -71,16 +65,13 @@ export default function AdminUsers() {
         return () => clearInterval(interval);
     }, []);
 
-    /* 🔁 ROLE CHANGE HANDLER */
     const handleRoleChange = async (userId, newRole) => {
         try {
-            // optimistic update
             setUsers((prev) =>
                 prev.map((u) =>
                     u.id === userId ? { ...u, role: newRole } : u
                 )
             );
-
             await updateUserRole(userId, newRole);
         } catch (err) {
             alert("Failed to update role");
@@ -88,10 +79,8 @@ export default function AdminUsers() {
         }
     };
 
-    /* 🧠 FILTER + SORT */
     const filteredUsers = useMemo(() => {
         let filtered = [...users];
-
         if (search.trim()) {
             filtered = filtered.filter(
                 (u) =>
@@ -99,44 +88,35 @@ export default function AdminUsers() {
                     u.email.toLowerCase().includes(search.toLowerCase())
             );
         }
-
-        if (roleFilter !== "ALL") {
-            filtered = filtered.filter((u) => u.role === roleFilter);
-        }
-
-        if (secureFilter !== "ALL") {
-            filtered = filtered.filter(
-                (u) => u.secureMode === (secureFilter === "ON")
-            );
-        }
-
-        if (sortBy === "NAME") {
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
-        }
-
-        if (sortBy === "TIME") {
-            filtered.sort(
-                (a, b) =>
-                    new Date(b.createdAt || 0) -
-                    new Date(a.createdAt || 0)
-            );
-        }
-
+        if (roleFilter !== "ALL") filtered = filtered.filter((u) => u.role === roleFilter);
+        if (secureFilter !== "ALL") filtered = filtered.filter((u) => u.secureMode === (secureFilter === "ON"));
+        if (sortBy === "NAME") filtered.sort((a, b) => a.name.localeCompare(b.name));
+        if (sortBy === "TIME") filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         return filtered;
     }, [users, search, roleFilter, secureFilter, sortBy]);
 
-    if (loading) {
-        return <h2 style={{ textAlign: "center" }}>Loading users...</h2>;
-    }
+    const handleDeleteUser = async (userId) => {
+        try {
+            await deleteUser(userId);
+            setUsers((prev) => prev.filter((u) => u.id !== userId));
+            setUserToDelete(null);  // Close modal
+        } catch (error) {
+            alert("Failed to delete user");
+        }
+    };
+
+    const handleRightClick = (e, user) => {
+        e.preventDefault();  // Prevent default right-click menu
+        setUserToDelete(user);  // Set user to be deleted
+    };
+
+    if (loading) return <h2 style={{ textAlign: "center" }}>Loading users...</h2>;
 
     return (
         <div className="admin-users-container">
             <div className="admin-users-header">
                 <h2>Jarvis Users</h2>
-                <button
-                    className="back-btn"
-                    onClick={() => navigate("/dashboard")}
-                >
+                <button className="back-btn" onClick={() => navigate("/dashboard")}>
                     ← Back to Dashboard
                 </button>
             </div>
@@ -148,19 +128,16 @@ export default function AdminUsers() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
-
                 <select onChange={(e) => setRoleFilter(e.target.value)}>
                     <option value="ALL">All Roles</option>
                     <option value="user">User</option>
                     <option value="guest">Guest</option>
                 </select>
-
                 <select onChange={(e) => setSecureFilter(e.target.value)}>
                     <option value="ALL">All Secure Modes</option>
                     <option value="ON">Secure ON</option>
                     <option value="OFF">Secure OFF</option>
                 </select>
-
                 <select onChange={(e) => setSortBy(e.target.value)}>
                     <option value="NAME">Sort by Name</option>
                     <option value="TIME">Sort by Joined Time</option>
@@ -187,56 +164,52 @@ export default function AdminUsers() {
                     </tr>
                 ) : (
                     filteredUsers.map((user) => (
-                        <tr key={user.id}>
+                        <tr key={user.id} onContextMenu={(e) => handleRightClick(e, user)}>
                             <td>{user.name}</td>
                             <td>{user.email}</td>
-
-                            {/* ✅ ROLE DROPDOWN */}
                             <td>
                                 <select
                                     value={user.role}
-                                    onChange={(e) =>
-                                        handleRoleChange(
-                                            user.id,
-                                            e.target.value
-                                        )
-                                    }
+                                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                     className="role-dropdown"
                                 >
                                     <option value="user">User</option>
                                     <option value="guest">Guest</option>
                                 </select>
                             </td>
-
                             <td>{formatDateTime(user.createdAt)}</td>
                             <td>
                                 {isUserReallyOnline(user) ? (
-                                    <span className="status-online">
-                                            🟢 Online
-                                        </span>
+                                    <span className="status-online">🟢 Online</span>
                                 ) : (
                                     <span className="status-offline">
-                                            🔴 Offline (last seen{" "}
-                                        {getLastSeenText(user.lastSeenAt)})
+                                            🔴 Offline (last seen {getLastSeenText(user.lastSeenAt)})
                                         </span>
                                 )}
                             </td>
                             <td>
-                                <select
-                                    className="role-dropdown"
-                                    value={String(user.secureMode)}
-                                    readOnly
+                                <button
+                                    className="secure-btn"
+                                    onClick={() => {
+                                        sessionStorage.setItem("secureUser", JSON.stringify({ id: user.id, name: user.name, email: user.email }));
+                                        navigate(`/admin/secure-commands/${user.id}`);
+                                    }}
                                 >
-                                    <option value="true">ON</option>
-                                    <option value="false">OFF</option>
-                                </select>
+                                    ⚙ Manage Commands
+                                </button>
                             </td>
-
                         </tr>
                     ))
                 )}
                 </tbody>
             </table>
+
+            {/* Add Delete Confirmation Modal */}
+            <DeleteConfirm
+                user={userToDelete}
+                onCancel={() => setUserToDelete(null)}  // Cancel action
+                onConfirm={() => handleDeleteUser(userToDelete.id)}  // Confirm deletion
+            />
         </div>
     );
 }

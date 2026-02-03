@@ -75,71 +75,182 @@
 /* ==============================
    📊 USERS TABLE
    ============================== */
+/* ==============================
+   📊 USERS TABLE (ENHANCED)
+   ============================== */
 .users-table {
     width: 100%;
-    border-collapse: collapse;
-    background: #020617;
-    border-radius: 12px;
+    max-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background: linear-gradient(
+            180deg,
+            #020617,
+            #030a1a
+    );
+
+    border-radius: 16px;
     overflow: hidden;
     border: 1px solid #1f2937;
+
+    box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.55);
+}
+
+/* ===== TABLE HEAD ===== */
+.users-table thead {
+    background: linear-gradient(
+            180deg,
+            #020617,
+            #050b1f
+    );
 }
 
 .users-table th {
     text-align: left;
-    padding: 14px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #9ca3af;
+    padding: 18px 20px; /* 🔥 bigger */
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+
+    color: #c7d2fe;
     border-bottom: 1px solid #1f2937;
 }
 
+/* ===== TABLE BODY ===== */
 .users-table td {
-    padding: 14px;
-    font-size: 14px;
+    padding: 18px 20px; /* 🔥 taller rows */
+    font-size: 15px;
     color: #e5e7eb;
     border-bottom: 1px solid #1f2937;
+    vertical-align: middle;
+}
+
+/* ===== ROW ===== */
+.users-table tbody tr {
+    transition:
+            background 0.25s ease,
+            transform 0.15s ease;
 }
 
 .users-table tbody tr:hover {
-    background: rgba(99, 102, 241, 0.08);
+    background: rgba(99, 102, 241, 0.12);
+    transform: scale(1.002);
+}
+
+/* ===== LAST ROW FIX ===== */
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== COLUMN WIDTH CONTROL (OPTIONAL) ===== */
+.users-table th:nth-child(1),
+.users-table td:nth-child(1) {
+    min-width: 180px;
+}
+
+.users-table th:nth-child(2),
+.users-table td:nth-child(2) {
+    min-width: 260px;
+}
+
+.users-table th:nth-child(6),
+.users-table td:nth-child(6) {
+    min-width: 220px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .users-table th,
+    .users-table td {
+        padding: 14px 14px;
+        font-size: 14px;
+    }
 }
 
 /* ==============================
    🎭 ROLE DROPDOWN (GLOBAL)
    ============================== */
+/* ==============================
+   🎭 ROLE DROPDOWN (ADMIN GRADE)
+   ============================== */
 .role-dropdown {
     appearance: none;
-    padding: 6px 30px 6px 12px;
-    border-radius: 6px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    padding: 10px 36px 10px 14px;
+    min-width: 110px;
+
+    border-radius: 10px;
     border: 1px solid #334155;
+
     background-color: #020617;
-    color: #f8fafc;
-    font-size: 13px;
+    color: #e5e7eb;
+
+    font-size: 14px;
     font-weight: 600;
+    letter-spacing: 0.3px;
+
     cursor: pointer;
 
+    /* Custom arrow */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 8px center;
+    background-position: right 12px center;
+
+    transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            background-color 0.2s ease,
+            transform 0.15s ease;
 }
 
+/* 🖱 Hover */
 .role-dropdown:hover {
     border-color: #6366f1;
+    background-color: #020617;
 }
 
+/* 🎯 Focus (keyboard + click) */
 .role-dropdown:focus {
     outline: none;
     border-color: #6366f1;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 
-/* Option colors */
+/* 🖱 Active (click feedback) */
+.role-dropdown:active {
+    transform: scale(0.98);
+}
+
+/* ==============================
+   🎨 OPTION COLORS
+   ============================== */
+.role-dropdown option {
+    background: #020617;
+    color: #e5e7eb;
+    font-weight: 600;
+}
+
 .role-dropdown option[value="user"] {
-    color: #22c55e;
+    color: #22c55e; /* green */
 }
 
 .role-dropdown option[value="guest"] {
-    color: #f59e0b;
+    color: #f59e0b; /* amber */
+}
+
+/* ==============================
+   📱 MOBILE TWEAK
+   ============================== */
+@media (max-width: 768px) {
+    .role-dropdown {
+        font-size: 13px;
+        padding: 9px 34px 9px 12px;
+        min-width: 100px;
+    }
 }
 
 /* ==============================
@@ -188,4 +299,99 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+/* 🔐 Secure Admin Button */
+.secure-btn {
+    position: relative;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+
+    color: #eaf4ff;
+    background: linear-gradient(135deg, #0a2a43, #0f4c75);
+    border: 1px solid rgba(0, 180, 255, 0.35);
+    border-radius: 10px;
+
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    box-shadow:
+            0 6px 16px rgba(0, 0, 0, 0.35),
+            inset 0 0 0 rgba(255, 255, 255, 0);
+
+    backdrop-filter: blur(8px);
+    transition: all 0.25s ease;
+}
+
+/* ⚙ Icon animation */
+.secure-btn::before {
+    content: "⚙";
+    font-size: 15px;
+    transition: transform 0.4s ease;
+}
+
+/* ✨ Hover */
+.secure-btn:hover {
+    background: linear-gradient(135deg, #0f4c75, #1488cc);
+    box-shadow:
+            0 10px 26px rgba(20, 136, 204, 0.45),
+            inset 0 0 12px rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.secure-btn:hover::before {
+    transform: rotate(90deg);
+}
+
+/* 🖱 Active (click) */
+.secure-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+/* 🚫 Disabled */
+.secure-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+}
+
+/* 📱 Mobile tweak */
+@media (max-width: 768px) {
+    .secure-btn {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
+}
+.context-menu {
+    position: absolute;
+    background: #121820;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    min-width: 160px;
+    padding: 6px 0;
+}
+
+.context-menu-item {
+    padding: 10px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #eaeaea;
+}
+
+.context-menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.context-menu-item.delete {
+    color: #ff5c5c;
+}
+
+.context-menu-item.delete:hover {
+    background: rgba(255, 92, 92, 0.15);
 }
