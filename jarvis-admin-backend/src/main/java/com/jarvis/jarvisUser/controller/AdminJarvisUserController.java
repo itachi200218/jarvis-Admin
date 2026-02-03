@@ -2,6 +2,7 @@ package com.jarvis.jarvisUser.controller;
 
 import com.jarvis.jarvisAdmin.dto.AdminUserDTO;
 import com.jarvis.jarvisUser.model.User;
+import com.jarvis.jarvisUser.service.AdminUserService;
 import com.jarvis.repository.JarvisUserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,4 +113,22 @@ public class AdminJarvisUserController {
 
                 .collect(Collectors.toList());
     }
+    /* ==========================
+   🔁 UPDATE USER ROLE (ADMIN)
+   ========================== */
+    @Autowired
+    private AdminUserService adminUserService;
+
+    @PutMapping("/{id}/role")
+    public void updateUserRole(
+            @PathVariable String id,
+            @RequestParam String role
+    ) {
+        if (!role.equalsIgnoreCase("user") && !role.equalsIgnoreCase("guest")) {
+            throw new IllegalArgumentException("Invalid role");
+        }
+
+        adminUserService.updateUserRole(id, role.toLowerCase());
+    }
+
 }

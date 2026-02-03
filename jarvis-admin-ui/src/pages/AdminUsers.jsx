@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllUsers } from "../api/adminApi";
+import { getAllUsers, updateUserRole } from "../api/adminApi";
 import "../styles/adminUsers.css";
 
 /* 🕒 Date + Time Formatter */
@@ -17,7 +17,7 @@ function formatDateTime(dateString) {
     });
 }
 
-/* ⏱ Last Seen Text (USES lastSeenAt) */
+/* ⏱ Last Seen Text */
 function getLastSeenText(lastSeenAt) {
     if (!lastSeenAt) return "never";
 
@@ -32,12 +32,11 @@ function getLastSeenText(lastSeenAt) {
     return `${days} days ago`;
 }
 
-/* 🟢 REAL ONLINE CHECK (ADMIN TRUTH) */
+/* 🟢 REAL ONLINE CHECK */
 function isUserReallyOnline(user) {
     if (!user.online || !user.lastSeenAt) return false;
-
     const diffMs = Date.now() - new Date(user.lastSeenAt).getTime();
-    return diffMs / 60000 <= 2; // ✅ 2-minute window
+    return diffMs / 60000 <= 2;
 }
 
 export default function AdminUsers() {
@@ -58,23 +57,36 @@ export default function AdminUsers() {
                 setUsers(data);
                 setLoading(false);
             })
-            .catch((err) => {
-                console.error(err);
+            .catch(() => {
                 localStorage.removeItem("token");
                 navigate("/login");
             });
     }, [navigate]);
 
-    /* 🔄 AUTO REFRESH (EVERY 5 SECONDS) */
+    /* 🔄 AUTO REFRESH */
     useEffect(() => {
         const interval = setInterval(() => {
-            getAllUsers()
-                .then(setUsers)
-                .catch(() => {});
-        }, 5000); // ✅ stable polling
-
+            getAllUsers().then(setUsers).catch(() => {});
+        }, 5000);
         return () => clearInterval(interval);
     }, []);
+
+    /* 🔁 ROLE CHANGE HANDLER */
+    const handleRoleChange = async (userId, newRole) => {
+        try {
+            // optimistic update
+            setUsers((prev) =>
+                prev.map((u) =>
+                    u.id === userId ? { ...u, role: newRole } : u
+                )
+            );
+
+            await updateUserRole(userId, newRole);
+        } catch (err) {
+            alert("Failed to update role");
+            getAllUsers().then(setUsers);
+        }
+    };
 
     /* 🧠 FILTER + SORT */
     const filteredUsers = useMemo(() => {
@@ -139,7 +151,7 @@ export default function AdminUsers() {
 
                 <select onChange={(e) => setRoleFilter(e.target.value)}>
                     <option value="ALL">All Roles</option>
-                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
                     <option value="guest">Guest</option>
                 </select>
 
@@ -178,11 +190,24 @@ export default function AdminUsers() {
                         <tr key={user.id}>
                             <td>{user.name}</td>
                             <td>{user.email}</td>
+
+                            {/* ✅ ROLE DROPDOWN */}
                             <td>
-                                    <span className="role-badge">
-                                        {user.role}
-                                    </span>
+                                <select
+                                    value={user.role}
+                                    onChange={(e) =>
+                                        handleRoleChange(
+                                            user.id,
+                                            e.target.value
+                                        )
+                                    }
+                                    className="role-dropdown"
+                                >
+                                    <option value="user">User</option>
+                                    <option value="guest">Guest</option>
+                                </select>
                             </td>
+
                             <td>{formatDateTime(user.createdAt)}</td>
                             <td>
                                 {isUserReallyOnline(user) ? (
@@ -196,15 +221,17 @@ export default function AdminUsers() {
                                         </span>
                                 )}
                             </td>
-                            <td
-                                className={
-                                    user.secureMode
-                                        ? "secure-on"
-                                        : "secure-off"
-                                }
-                            >
-                                {user.secureMode ? "ON" : "OFF"}
+                            <td>
+                                <select
+                                    className="role-dropdown"
+                                    value={String(user.secureMode)}
+                                    readOnly
+                                >
+                                    <option value="true">ON</option>
+                                    <option value="false">OFF</option>
+                                </select>
                             </td>
+
                         </tr>
                     ))
                 )}

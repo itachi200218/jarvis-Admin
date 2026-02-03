@@ -71,3 +71,21 @@ export async function getAllUsers() {
 
     return response.json();
 }
+// adminApi.js
+export async function updateUserRole(userId, role) {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+        `http://localhost:8080/api/admin/jarvis-users/${userId}/role?role=${role}`,
+        {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    if (!res.ok) {
+        throw new Error("Failed to update role");
+    }
+}
