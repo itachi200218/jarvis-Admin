@@ -12,7 +12,8 @@ public class AdminUserDTO {
     private String avatar;
     private Instant createdAt;
     private Instant lastLoginAt;
-    private boolean online; // ✅ ADD THIS
+    private boolean online;
+    private Instant lastSeenAt; // 🔥 REQUIRED
 
     public AdminUserDTO(
             String id,
@@ -23,7 +24,8 @@ public class AdminUserDTO {
             String avatar,
             Instant createdAt,
             Instant lastLoginAt,
-            boolean online              // ✅ ADD THIS
+            boolean online,
+            Instant lastSeenAt           // 🔥 ADD
     ) {
         this.id = id;
         this.name = name;
@@ -33,7 +35,8 @@ public class AdminUserDTO {
         this.avatar = avatar;
         this.createdAt = createdAt;
         this.lastLoginAt = lastLoginAt;
-        this.online = online;          // ✅ ADD THIS
+        this.online = online;
+        this.lastSeenAt = lastSeenAt;
     }
 
     public String getId() { return id; }
@@ -44,5 +47,6 @@ public class AdminUserDTO {
     public String getAvatar() { return avatar; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastLoginAt() { return lastLoginAt; }
-    public boolean isOnline() { return online; } // ✅ ADD THIS
+    public boolean isOnline() { return online; }
+    public Instant getLastSeenAt() { return lastSeenAt; } // 🔥 ADD
 }

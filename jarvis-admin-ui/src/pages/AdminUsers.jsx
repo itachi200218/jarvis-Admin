@@ -17,11 +17,11 @@ function formatDateTime(dateString) {
     });
 }
 
-/* ⏱ Last Seen Text */
-function getLastSeenText(lastLoginAt) {
-    if (!lastLoginAt) return "never";
+/* ⏱ Last Seen Text (USES lastSeenAt) */
+function getLastSeenText(lastSeenAt) {
+    if (!lastSeenAt) return "never";
 
-    const diffMs = Date.now() - new Date(lastLoginAt).getTime();
+    const diffMs = Date.now() - new Date(lastSeenAt).getTime();
     const minutes = Math.floor(diffMs / 60000);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
@@ -32,12 +32,12 @@ function getLastSeenText(lastLoginAt) {
     return `${days} days ago`;
 }
 
-/* 🟢 REAL ONLINE CHECK (5-MIN WINDOW) */
+/* 🟢 REAL ONLINE CHECK (ADMIN TRUTH) */
 function isUserReallyOnline(user) {
-    if (!user.online || !user.lastLoginAt) return false;
+    if (!user.online || !user.lastSeenAt) return false;
 
-    const diffMs = Date.now() - new Date(user.lastLoginAt).getTime();
-    return diffMs / 60000 <= 5;
+    const diffMs = Date.now() - new Date(user.lastSeenAt).getTime();
+    return diffMs / 60000 <= 2; // ✅ 2-minute window
 }
 
 export default function AdminUsers() {
@@ -65,13 +65,13 @@ export default function AdminUsers() {
             });
     }, [navigate]);
 
-    /* 🔄 AUTO REFRESH (30s) */
+    /* 🔄 AUTO REFRESH (EVERY 5 SECONDS) */
     useEffect(() => {
         const interval = setInterval(() => {
             getAllUsers()
                 .then(setUsers)
                 .catch(() => {});
-        }, 500);
+        }, 5000); // ✅ stable polling
 
         return () => clearInterval(interval);
     }, []);
@@ -121,7 +121,10 @@ export default function AdminUsers() {
         <div className="admin-users-container">
             <div className="admin-users-header">
                 <h2>Jarvis Users</h2>
-                <button className="back-btn" onClick={() => navigate("/dashboard")}>
+                <button
+                    className="back-btn"
+                    onClick={() => navigate("/dashboard")}
+                >
                     ← Back to Dashboard
                 </button>
             </div>
@@ -176,19 +179,30 @@ export default function AdminUsers() {
                             <td>{user.name}</td>
                             <td>{user.email}</td>
                             <td>
-                                <span className="role-badge">{user.role}</span>
+                                    <span className="role-badge">
+                                        {user.role}
+                                    </span>
                             </td>
                             <td>{formatDateTime(user.createdAt)}</td>
                             <td>
                                 {isUserReallyOnline(user) ? (
-                                    <span className="status-online">🟢 Online</span>
+                                    <span className="status-online">
+                                            🟢 Online
+                                        </span>
                                 ) : (
                                     <span className="status-offline">
-                                            🔴 Offline (last seen {getLastSeenText(user.lastLoginAt)})
+                                            🔴 Offline (last seen{" "}
+                                        {getLastSeenText(user.lastSeenAt)})
                                         </span>
                                 )}
                             </td>
-                            <td className={user.secureMode ? "secure-on" : "secure-off"}>
+                            <td
+                                className={
+                                    user.secureMode
+                                        ? "secure-on"
+                                        : "secure-off"
+                                }
+                            >
                                 {user.secureMode ? "ON" : "OFF"}
                             </td>
                         </tr>

@@ -104,10 +104,12 @@ public class AdminJarvisUserController {
                         user.getAvatar(),
                         user.getCreatedAt(),
                         user.getLastLoginAt(),
-                        user.isOnline()          // ✅ THIS WAS MISSING
+                        user.isOnline(),
+                        user.getLastSeenAt()     // 🔥 THIS IS THE KEY
                 ))
 
 
-                        .collect(Collectors.toList());
+
+                .collect(Collectors.toList());
     }
 }

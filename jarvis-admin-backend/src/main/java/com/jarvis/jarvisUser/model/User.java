@@ -23,15 +23,19 @@ public class User {
     private boolean secureMode;
     private String avatar;
 
-    // 🟢 ONLINE STATUS (FROM FASTAPI)
-    private boolean online; // ✅ THIS WAS MISSING
+    // 🟢 ONLINE FLAG (STATE)
+    private boolean online;
 
-    // ✅ AUTO CREATED TIME (UTC)
+    // 🕒 LAST SEEN (TRUTH SOURCE)
+    @Field("last_seen_at")
+    private Instant lastSeenAt;   // 🔥 THIS WAS MISSING
+
+    // 🕒 CREATED TIME (UTC)
     @CreatedDate
     @Field("created_at")
     private Instant createdAt;
 
-    // ✅ LAST LOGIN TIME
+    // 🕒 LAST LOGIN
     @Field("last_login_at")
     private Instant lastLoginAt;
 }
