@@ -498,3 +498,17 @@
 
 .dot.today { background: #38bdf8; }
 .dot.total { background: #22c55e; }
+.support-btn {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-right: auto; /* pushes profile to right */
+}
+
+.support-btn:hover {
+    opacity: 0.9;
+}

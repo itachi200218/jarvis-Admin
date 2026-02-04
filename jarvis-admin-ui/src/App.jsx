@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import AdminUsers from "./pages/AdminUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminSecureCommands from "./pages/AdminSecureCommands";
+import SupportTickets from "./pages/SupportTickets"; // ✅ ADD THIS
 
 function App() {
     return (
@@ -14,7 +15,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<AddUser />} />
 
-                {/* 🔐 PROTECTED */}
+                {/* 🔐 PROTECTED ROUTES */}
                 <Route
                     path="/dashboard"
                     element={
@@ -32,6 +33,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
                 <Route
                     path="/admin/secure-commands/:userId"
                     element={
@@ -41,7 +43,15 @@ function App() {
                     }
                 />
 
-
+                {/* 🎧 SUPPORT TICKETS (PROTECTED) */}
+                <Route
+                    path="/admin-support"
+                    element={
+                        <ProtectedRoute>
+                            <SupportTickets />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </BrowserRouter>
     );

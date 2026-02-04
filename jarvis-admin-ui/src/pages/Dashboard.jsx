@@ -85,6 +85,12 @@ export default function Dashboard() {
 
             {/* 👤 TOP BAR */}
             <div className="dashboard-topbar">
+                <button
+                    className="support-btn"
+                    onClick={() => navigate("/admin-support")}
+                >
+                    🎧 Support
+                </button>
 
                 <div
                     className="profile"

@@ -14,16 +14,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                // ❌ No CSRF for APIs
                 .csrf(csrf -> csrf.disable())
-
-                // ✅ Enable CORS (frontend → backend)
                 .cors(cors -> {})
 
-                // 🔐 AUTH RULES
                 .authorizeHttpRequests(auth -> auth
-
-                        // 🔓 PUBLIC (NO TOKEN)
                         .requestMatchers(
                                 "/admin/users/login",
                                 "/admin/users/add",
@@ -32,14 +26,10 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        // 🔒 ADMIN APIs (JWT REQUIRED)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // 🔒 EVERYTHING ELSE NEEDS JWT
                         .anyRequest().authenticated()
                 )
 
-                // 🔑 JWT FILTER
                 .addFilterBefore(
                         new JwtFilter(),
                         UsernamePasswordAuthenticationFilter.class
