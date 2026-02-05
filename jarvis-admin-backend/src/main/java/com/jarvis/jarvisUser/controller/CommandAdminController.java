@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/commands") // ✅ FIX PATH
-@PreAuthorize("hasRole('ADMIN')")      // ✅ ADMIN ONLY
+@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 public class CommandAdminController {
 
     private final CommandService service;

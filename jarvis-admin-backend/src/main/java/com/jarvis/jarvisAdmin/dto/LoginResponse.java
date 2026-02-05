@@ -4,10 +4,12 @@ public class LoginResponse {
 
     private boolean success;
     private String token;
+    private String role;   // ✅ NEW
 
-    public LoginResponse(boolean success, String token) {
+    public LoginResponse(boolean success, String token, String role) {
         this.success = success;
         this.token = token;
+        this.role = role;
     }
 
     public boolean isSuccess() {
@@ -16,5 +18,9 @@ public class LoginResponse {
 
     public String getToken() {
         return token;
+    }
+
+    public String getRole() {
+        return role;
     }
 }

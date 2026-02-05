@@ -512,3 +512,46 @@
 .support-btn:hover {
     opacity: 0.9;
 }
+.super-btn {
+    background: linear-gradient(135deg, #ffc800, #ff9f00);
+    color: #1a1a1a;
+    font-weight: 700;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    box-shadow:
+            0 8px 20px rgba(255, 200, 0, 0.25),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+    transition: all 0.25s ease;
+}
+
+.super-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+            0 12px 30px rgba(255, 200, 0, 0.35),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.super-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}

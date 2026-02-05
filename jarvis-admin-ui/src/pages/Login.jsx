@@ -56,9 +56,9 @@ export default function Login() {
 
                 {message && <p>{message}</p>}
 
-                <p className="auth-link">
-                    No account? <Link to="/register">Register</Link>
-                </p>
+                {/*<p className="auth-link">*/}
+                {/*    No account? <Link to="/register">Register</Link>*/}
+                {/*</p>*/}
             </form>
         </div>
     );

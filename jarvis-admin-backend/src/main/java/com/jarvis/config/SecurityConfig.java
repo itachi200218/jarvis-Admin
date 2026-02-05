@@ -3,11 +3,13 @@ package com.jarvis.config;
 import com.jarvis.security.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity   // 🔥 REQUIRED for @PreAuthorize
 public class SecurityConfig {
 
     @Bean
@@ -26,7 +28,9 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 🔥 THIS IS THE FIX
+                        .requestMatchers("/admin/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
 

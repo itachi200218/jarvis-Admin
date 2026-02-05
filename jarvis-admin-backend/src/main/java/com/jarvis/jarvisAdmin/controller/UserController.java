@@ -4,6 +4,7 @@ import com.jarvis.jarvisAdmin.dto.LoginResponse;
 import com.jarvis.jarvisAdmin.dto.UpdateProfileRequest;
 import com.jarvis.jarvisAdmin.dto.AuthResponse;
 import com.jarvis.jarvisAdmin.model.User;
+import com.jarvis.jarvisAdmin.model.Role;
 import com.jarvis.jarvisAdmin.service.UserService;
 import com.jarvis.repository.AdminAuthRepository;
 import com.jarvis.security.JwtUtil;
@@ -11,6 +12,7 @@ import com.jarvis.security.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -27,15 +29,12 @@ public class UserController {
     private AdminAuthRepository userRepository;
 
     /* ==========================
-       ✅ REGISTER (PUBLIC)
+       👑 CREATE ADMIN (SUPER ADMIN ONLY)
        ========================== */
-    @PostMapping("/add")
-    public ResponseEntity<?> addUser(@RequestBody User user) {
-        try {
-            return ResponseEntity.ok(userService.save(user));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping("/create")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> createAdmin(@RequestBody User user) {
+        return ResponseEntity.ok(userService.createAdmin(user));
     }
 
     /* ==========================
@@ -44,8 +43,23 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User req) {
 
+        Optional<User> userOpt =
+                userRepository.findByUsername(req.getUsername())
+                        .or(() -> userRepository.findByEmail(req.getUsername()));
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+
+        User user = userOpt.get();
+
+        // 🔒 block disabled admins
+        if (!user.isActive()) {
+            return ResponseEntity.status(403).body("Account disabled");
+        }
+
         boolean valid = userService.login(
-                req.getUsername(),
+                user.getUsername(),
                 req.getPassword()
         );
 
@@ -53,30 +67,23 @@ public class UserController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // 🔍 Resolve real user (username OR email)
-        Optional<User> userOpt =
-                userRepository.findByUsername(req.getUsername())
-                        .or(() -> userRepository.findByEmail(req.getUsername()));
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(401).body("User not found");
-        }
-
-        User user = userOpt.get();
-
-        // 🔑 Generate JWT
+        // 🔑 JWT with REAL ROLE
         String token = JwtUtil.generateToken(
                 user.getUsername(),
-                "ADMIN"
+                user.getRole().name()
         );
 
         return ResponseEntity.ok(
-                new LoginResponse(true, token)
+                new LoginResponse(
+                        true,
+                        token,
+                        user.getRole().name()
+                )
         );
     }
 
     /* ==========================
-       👤 PROFILE UPDATE (JWT)
+       👤 PROFILE UPDATE (SELF ONLY)
        ========================== */
     @PutMapping("/profile")
     public ResponseEntity<AuthResponse> updateProfile(
@@ -88,14 +95,26 @@ public class UserController {
             return ResponseEntity.status(401).build();
         }
 
-        String token = authHeader.replace("Bearer ", "");
-
+        String token = authHeader.substring(7);
         Claims claims = JwtUtil.validateToken(token);
+
         String currentUsername = claims.getSubject();
+        String role = claims.get("role", String.class);
+
+
 
         AuthResponse response =
                 userService.updateProfile(currentUsername, request);
 
         return ResponseEntity.ok(response);
     }
+    /* ==========================
+   👀 LIST ALL ADMINS (SUPER ADMIN ONLY)
+   ========================== */
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> getAllAdmins() {
+        return ResponseEntity.ok(userRepository.findAll());
+    }
+
 }

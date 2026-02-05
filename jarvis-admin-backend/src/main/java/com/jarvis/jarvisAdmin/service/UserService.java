@@ -6,13 +6,18 @@ import com.jarvis.jarvisAdmin.dto.UpdateProfileRequest;
 
 public interface UserService {
 
+    // ✅ REGISTER
     User save(User user);
 
-    boolean login(String input, String password); // 👈 KEEP (NO CHANGE)
+    // ✅ LOGIN (password check)
+    boolean login(String input, String password);
 
-    // 🔐 NEW (JWT LOGIN)
+    // 🔐 JWT LOGIN
     AuthResponse loginWithJwt(String input, String password);
 
     // 👤 PROFILE UPDATE
     AuthResponse updateProfile(String currentUsername, UpdateProfileRequest request);
+
+    // 👑 SUPER ADMIN
+    User createAdmin(User user); // ✅ FIXED
 }

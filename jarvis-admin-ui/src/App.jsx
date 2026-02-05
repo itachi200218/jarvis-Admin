@@ -6,7 +6,8 @@ import AdminUsers from "./pages/AdminUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminSecureCommands from "./pages/AdminSecureCommands";
 import SupportTickets from "./pages/SupportTickets"; // ✅ ADD THIS
-
+import SuperAdminRoute from "./auth/SuperAdminRoute";
+import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
 function App() {
     return (
         <BrowserRouter>
@@ -50,6 +51,14 @@ function App() {
                         <ProtectedRoute>
                             <SupportTickets />
                         </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/super-admin"
+                    element={
+                        <SuperAdminRoute>
+                            <SuperAdminDashboard />
+                        </SuperAdminRoute>
                     }
                 />
             </Routes>

@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.jarvis.jarvisAdmin.model.User;
+import com.jarvis.jarvisAdmin.model.Role; // ✅ ADDED
 import com.jarvis.jarvisAdmin.service.UserService;
 import com.jarvis.jarvisAdmin.dto.AuthResponse;
 import com.jarvis.jarvisAdmin.dto.UpdateProfileRequest;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
 
     // ==========================
-    // ✅ REGISTER (NO CHANGE)
+    // ✅ REGISTER (UNCHANGED)
     // ==========================
     @Override
     public User save(User user) {
@@ -43,11 +44,44 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setCreatedAt(LocalDateTime.now(IST));
 
+        // ✅ ENSURE ROLE EXISTS (IMPORTANT)
+        if (user.getRole() == null) {
+            user.setRole(Role.ADMIN);
+        }
+
         return userRepository.save(user);
     }
 
+    @Override
+    public User createAdmin(User user) {
+
+        // 🔒 prevent duplicates
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        // 🔐 hash password
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // 👑 force ADMIN role (SUPER_ADMIN creates ADMIN only)
+        user.setRole(Role.ADMIN);
+
+        // ✅ enable account
+        user.setActive(true);
+
+        // ⏰ timestamps
+        user.setCreatedAt(LocalDateTime.now(IST));
+
+        return userRepository.save(user);
+    }
+
+
     // ==========================
-    // ✅ LOGIN (NO CHANGE)
+    // ✅ LOGIN (UNCHANGED)
     // ==========================
     @Override
     public boolean login(String input, String password) {
@@ -73,7 +107,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // ==========================
-    // 🔐 JWT LOGIN (NEW)
+    // 🔐 JWT LOGIN (SUPER ADMIN READY)
     // ==========================
     @Override
     public AuthResponse loginWithJwt(String input, String password) {
@@ -95,16 +129,17 @@ public class UserServiceImpl implements UserService {
         user.setLastLoginAt(LocalDateTime.now(IST));
         userRepository.save(user);
 
+        // ✅ ROLE IS DYNAMIC (ADMIN / SUPER_ADMIN)
         String token = JwtUtil.generateToken(
                 user.getUsername(),
-                "ADMIN"
+                user.getRole().name()
         );
 
         return new AuthResponse(true, token);
     }
 
     // ==========================
-    // 👤 PROFILE UPDATE (NEW)
+    // 👤 PROFILE UPDATE (SUPER ADMIN SAFE)
     // ==========================
     @Override
     public AuthResponse updateProfile(
@@ -129,10 +164,10 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        // 🔁 NEW TOKEN AFTER UPDATE
+        // 🔁 TOKEN WITH REAL ROLE
         String newToken = JwtUtil.generateToken(
                 user.getUsername(),
-                "ADMIN"
+                user.getRole().name()
         );
 
         return new AuthResponse(true, newToken);

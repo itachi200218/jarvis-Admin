@@ -227,10 +227,22 @@ export default function Dashboard() {
                     >
                         View All Users
                     </button>
+
+                    {/* 👑 SUPER ADMIN ONLY BUTTON */}
+                    {user?.role === "SUPER_ADMIN" && (
+                        <button
+                            className="super-btn"
+                            onClick={() => navigate("/super-admin")}
+                        >
+                            👑 Super Admin Panel
+                        </button>
+                    )}
+
                     <button className="secondary-btn">
                         Export Report
                     </button>
                 </div>
+
 
             </div>
 
