@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -53,7 +54,6 @@ public class UserController {
 
         User user = userOpt.get();
 
-        // 🔒 block disabled admins
         if (!user.isActive()) {
             return ResponseEntity.status(403).body("Account disabled");
         }
@@ -67,7 +67,6 @@ public class UserController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // 🔑 JWT with REAL ROLE
         String token = JwtUtil.generateToken(
                 user.getUsername(),
                 user.getRole().name()
@@ -83,7 +82,7 @@ public class UserController {
     }
 
     /* ==========================
-       👤 PROFILE UPDATE (SELF ONLY)
+       👤 UPDATE OWN PROFILE (ADMIN / SUPER_ADMIN)
        ========================== */
     @PutMapping("/profile")
     public ResponseEntity<AuthResponse> updateProfile(
@@ -99,22 +98,61 @@ public class UserController {
         Claims claims = JwtUtil.validateToken(token);
 
         String currentUsername = claims.getSubject();
-        String role = claims.get("role", String.class);
-
-
 
         AuthResponse response =
                 userService.updateProfile(currentUsername, request);
 
         return ResponseEntity.ok(response);
     }
+
     /* ==========================
-   👀 LIST ALL ADMINS (SUPER ADMIN ONLY)
-   ========================== */
+       👀 LIST ALL ADMINS (SUPER ADMIN ONLY)
+       ========================== */
     @GetMapping("/all")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> getAllAdmins() {
         return ResponseEntity.ok(userRepository.findAll());
+    }
+
+    /* ==========================
+       ✏️ UPDATE ADMIN (SUPER ADMIN ONLY)
+       ========================== */
+    @PutMapping("/admin/{adminId}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<AuthResponse> updateAdminBySuperAdmin(
+            @PathVariable String adminId,
+            @RequestBody UpdateProfileRequest request
+    ) {
+        return ResponseEntity.ok(
+                userService.updateAdminBySuperAdmin(adminId, request)
+        );
+    }
+
+    /* ==========================
+       ❌ DELETE ADMIN (SUPER ADMIN ONLY)
+       ========================== */
+    @DeleteMapping("/admin/{adminId}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> deleteAdmin(@PathVariable String adminId) {
+        userService.deleteAdmin(adminId);
+        return ResponseEntity.ok("Admin deleted successfully");
+    }
+    /* ==========================
+   🔑 RESET ADMIN PASSWORD (SUPER ADMIN ONLY)
+   ========================== */
+    @PutMapping("/admin/{adminId}/reset-password")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> resetAdminPassword(
+            @PathVariable String adminId,
+            @RequestBody Map<String, String> body
+    ) {
+        String newPassword = body.get("password");
+
+        userService.resetAdminPassword(adminId, newPassword);
+
+        return ResponseEntity.ok(
+                Map.of("message", "Password reset successful")
+        );
     }
 
 }

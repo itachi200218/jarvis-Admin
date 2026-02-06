@@ -200,3 +200,70 @@ export async function deleteUser(userId) {
 
     return response.json();
 }
+/* =======================
+   ✏️ ADMIN – EDIT USER NAME
+   ======================= */
+export async function updateUserName(userId, name) {
+    const response = await fetch(
+        `/api/admin/jarvis-users/${userId}/name?name=${encodeURIComponent(name)}`,
+        {
+            method: "PUT",
+            headers: authHeader(),
+        }
+    );
+
+    if (response.status === 401 || response.status === 403) {
+        throw new Error("UNAUTHORIZED");
+    }
+
+    if (!response.ok) {
+        throw new Error("Failed to update username");
+    }
+
+    return response.json();
+}
+
+/* =======================
+   ✉️ ADMIN – EDIT USER EMAIL
+   ======================= */
+export async function updateUserEmail(userId, email) {
+    const response = await fetch(
+        `/api/admin/jarvis-users/${userId}/email?email=${encodeURIComponent(email)}`,
+        {
+            method: "PUT",
+            headers: authHeader(),
+        }
+    );
+
+    if (response.status === 401 || response.status === 403) {
+        throw new Error("UNAUTHORIZED");
+    }
+
+    if (!response.ok) {
+        throw new Error("Failed to update email");
+    }
+
+    return response.json();
+}
+/* =======================
+   🔐 ADMIN – RESET USER PASSWORD (EMAIL)
+   ======================= */
+export async function resetUserPassword(userId) {
+    const response = await fetch(
+        `/api/admin/jarvis-users/${userId}/reset-password`,
+        {
+            method: "POST",
+            headers: authHeader(),
+        }
+    );
+
+    if (response.status === 401 || response.status === 403) {
+        throw new Error("UNAUTHORIZED");
+    }
+
+    if (!response.ok) {
+        throw new Error("Failed to send reset password email");
+    }
+
+    return response.json();
+}

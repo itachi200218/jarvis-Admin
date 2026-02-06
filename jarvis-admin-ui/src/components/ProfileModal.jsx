@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { updateProfile } from "../api/userApi";
+import { useNotify } from "../context/NotificationContext";
 import "../styles/profileModal.css";
 
 export default function ProfileModal({ user, onClose }) {
+    const { notify } = useNotify(); // 🔔 ADD
     const [username, setUsername] = useState(user?.sub || "");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
     const handleSave = async () => {
-        setMessage("");
         setLoading(true);
 
         try {
@@ -20,9 +20,10 @@ export default function ProfileModal({ user, onClose }) {
                 password,
             });
 
-            setMessage("✅ Profile updated successfully");
+            // ✅ SUCCESS NOTIFY
+            notify("success", "Profile updated successfully.");
 
-            // close modal + refresh dashboard data
+            // close modal + refresh dashboard
             setTimeout(() => {
                 onClose();
                 window.location.reload();
@@ -30,7 +31,12 @@ export default function ProfileModal({ user, onClose }) {
 
         } catch (err) {
             console.error(err);
-            setMessage("❌ Failed to update profile");
+
+            // ❌ ERROR NOTIFY
+            notify(
+                "error",
+                err?.message || "Failed to update profile."
+            );
         } finally {
             setLoading(false);
         }
@@ -60,12 +66,6 @@ export default function ProfileModal({ user, onClose }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-
-                {message && (
-                    <p className={message.startsWith("✅") ? "success" : "error"}>
-                        {message}
-                    </p>
-                )}
 
                 <div className="modal-actions">
                     <button

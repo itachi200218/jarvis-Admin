@@ -6,18 +6,54 @@ import com.jarvis.jarvisAdmin.dto.UpdateProfileRequest;
 
 public interface UserService {
 
-    // ✅ REGISTER
+    /* ==========================
+       ✅ REGISTER / SAVE
+       ========================== */
     User save(User user);
 
-    // ✅ LOGIN (password check)
+    /* ==========================
+       🔐 LOGIN (password check)
+       ========================== */
     boolean login(String input, String password);
 
-    // 🔐 JWT LOGIN
+    /* ==========================
+       🔑 JWT LOGIN
+       ========================== */
     AuthResponse loginWithJwt(String input, String password);
 
-    // 👤 PROFILE UPDATE
-    AuthResponse updateProfile(String currentUsername, UpdateProfileRequest request);
+    /* ==========================
+       👤 UPDATE OWN PROFILE
+       ========================== */
+    AuthResponse updateProfile(
+            String currentUsername,
+            UpdateProfileRequest request
+    );
 
-    // 👑 SUPER ADMIN
-    User createAdmin(User user); // ✅ FIXED
+    /* ==========================
+       👑 SUPER ADMIN ACTIONS
+       ========================== */
+
+    // ➕ Create new ADMIN
+    User createAdmin(User user);
+
+    // ✏️ Update ADMIN (name / email)
+    AuthResponse updateAdminBySuperAdmin(
+            String adminId,
+            UpdateProfileRequest request
+    );
+
+    // ❌ Delete ADMIN
+    void deleteAdmin(String adminId);
+
+    // 🔑 SUPER ADMIN – RESET ADMIN PASSWORD
+    void resetAdminPassword(String adminId, String newPassword);
+    /* ==========================
+        📧 PASSWORD RESET (EMAIL)
+        ========================== */
+    void triggerPasswordResetEmail(String userId);
+    /* ==========================
+   🔐 PASSWORD RESET (TOKEN)
+   ========================== */
+//    void resetPasswordUsingToken(String token, String newPassword);
+
 }

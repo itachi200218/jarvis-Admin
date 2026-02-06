@@ -5,11 +5,13 @@ import {
     getUserCommandRules,
     toggleUserCommand,
 } from "../api/adminApi";
+import { useNotify } from "../context/NotificationContext";
 import "../styles/secureCommands.css";
 
 export default function AdminSecureCommands() {
     const { userId } = useParams();
     const navigate = useNavigate();
+    const { notify } = useNotify();
 
     /* 👤 USER INFO (PERSISTENT + SAFE) */
     const storedUser = sessionStorage.getItem("secureUser");
@@ -51,14 +53,14 @@ export default function AdminSecureCommands() {
                 setCommands(merged);
             } catch (err) {
                 console.error(err);
-                alert("Failed to load commands");
+                notify("error", "Failed to load commands");
             } finally {
                 setLoading(false);
             }
         }
 
         load();
-    }, [userId]);
+    }, [userId, notify]);
 
     /* 🔁 TOGGLE HANDLER */
     const handleToggle = async (intent, disabled) => {
@@ -72,8 +74,14 @@ export default function AdminSecureCommands() {
                         : c
                 )
             );
-        } catch {
-            alert("Failed to update command");
+
+            notify(
+                "success",
+                `${intent} ${disabled ? "enabled" : "disabled"}`
+            );
+        } catch (err) {
+            console.error(err);
+            notify("error", "Failed to update command");
         }
     };
 

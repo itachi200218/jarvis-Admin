@@ -6,6 +6,7 @@ import {
 } from "../api/adminApi";
 import ProfileModal from "../components/ProfileModal";
 import "../styles/dashboard.css";
+import { useNotify } from "../context/NotificationContext";
 
 /* 🔓 Decode JWT */
 function decodeJWT(token) {
@@ -32,6 +33,7 @@ export default function Dashboard() {
 
     const token = localStorage.getItem("token");
     const user = token ? decodeJWT(token) : null;
+    const { notify } = useNotify();
 
     /* 🔐 AUTH + REAL-TIME DATA */
     useEffect(() => {
@@ -51,9 +53,11 @@ export default function Dashboard() {
                 setTodayUsers(today);
                 setLoading(false);
             } catch {
+                notify("error", "Session expired or server unavailable.");
                 localStorage.removeItem("token");
                 navigate("/login");
             }
+
         };
 
         fetchStats();
